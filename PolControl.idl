@@ -1,0 +1,35 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+uuid(ef6f97c3-c5b6-4306-a563-a2c2e04dcd82),
+dual,
+oleautomation
+]
+interface IPolControl : IDispatch{
+      HRESULT TestConnect([out,retval] BSTR *presult);
+      HRESULT SendCommand([in] BSTR Motor, [in] INT Pos, [out,retval] INT *presult);
+      HRESULT FindSerialPorts([out,retval] INT *presult);
+      HRESULT ReadState([out,retval] BSTR *pcode);
+      HRESULT ReadControl([out,retval] BSTR *pcode);
+      HRESULT Home([out,retval] INT *presult);
+
+      [propget] HRESULT Connection([out,retval] BOOLEAN *var);
+      [propput] HRESULT Connection([in] BOOLEAN var);
+      [propget] HRESULT ControlPort([out,retval] INT *port);
+      [propput] HRESULT ControlPort([in] INT port);
+      [propget] HRESULT StatePort([out,retval] INT *port);
+      [propput] HRESULT StatePort([in] INT port);
+
+}
+
+[uuid(90cc0166-ef6e-402b-9bf2-070f1be607f5)]
+library PolControlTypeLib
+{
+  importlib("stdole2.tlb");
+  [uuid(5dcc4d21-4e30-4f00-ac58-985e0fccf31c)
+  ]
+  coclass PolControl{
+      [default] interface IPolControl;
+  };
+};
