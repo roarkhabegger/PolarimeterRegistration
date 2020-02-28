@@ -34,7 +34,7 @@ def main():
     my_cwd = os.getcwd()
     my_env = os.environ
     filename = r"PolControl.idl"
-    vsDir = r"C:\Program Files (x86)\Microsoft Visual Studio"
+    vsDir = r"\Program Files (x86)\Microsoft Visual Studio"
 
     ###search through Vis Studio for vcvars32.bat
     tree = os.scandir(vsDir)
@@ -66,35 +66,31 @@ def main():
 
     #Now we have the required registration material
     #Script to compile midl file
-    envArr = []
-    envArr2 = []
-    cmdArr = []
+    envArr1 = []
 
-    envArr.append('cd "'+batDir+ '"')
-    envArr.append("cd")
-    envArr.append(batFile+' &&midl /win32 "'+my_cwd+r'"\Polcontrol.idl')
-    envArr2.append('cd "'+batDir+ '"')
-    envArr2.append("cd")
-    envArr2.append(batFile+' && "'+my_cwd+r'"\Register.bat') #batFile#+
-    cmdArr.append('cd "'+my_cwd+'"')
-    cmdArr.append(pyStr+' PolControl.py -regserver')
+    regArr = []
+
+    envArr1.append('call cd "'+batDir+ r'" ')
+    envArr1.append("call "+batFile)
+
+    envArr1.append('call cd "'+my_cwd +'" ')
+    envArr1.append(r'call midl '+r'Polcontrol.idl /win32')
+
+    regArr.append('call cd "'+my_cwd+'"')
+    regArr.append("call "+ pyStr+' PolControl.py -regserver')
 
     File1 = open("SetEnv1.bat","w+")
     File1.truncate()
-    File1.writelines("%s \n" % c for c in envArr)#+" \n",cmd3])
+    File1.writelines("%s \n" % c for c in envArr1)#+" \n",cmd3])
     File1.close()
 
-    File2 = open("SetEnv2.bat","w+")
+
+    File2 = open("Register.bat","w+")
     File2.truncate()
-    File2.writelines("%s \n" % c for c in envArr2)#+" \n",cmd3])
+    File2.writelines("%s \n" % c for c in regArr)#+" \n",cmd3])
     File2.close()
 
-    File3 = open("Register.bat","w+")
-    File3.truncate()
-    File3.writelines("%s \n" % c for c in cmdArr)#+" \n",cmd3])
-    File3.close()
     inst = sp.call("SetEnv1.bat")
-    print("Defining server")
-    inst = sp.call("SetEnv2.bat")
-    #inst = sp.call("Register.bat")
+
+    inst = sp.call("Register.bat")
 main()
