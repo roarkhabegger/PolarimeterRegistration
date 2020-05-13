@@ -20,6 +20,8 @@ interface IPolControl : IDispatch{
       [propput] HRESULT ControlPort([in] INT port);
       [propget] HRESULT StatePort([out,retval] INT *port);
       [propput] HRESULT StatePort([in] INT port);
+      [propget] HRESULT Simulation([out,retval] BOOLEAN *state);
+      [propput] HRESULT Simulation([in] BOOLEAN state);
 
 }
 

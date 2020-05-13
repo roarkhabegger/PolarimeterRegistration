@@ -42,8 +42,7 @@ def recvFromArduino(ser):
     return startMarker+ck+endMarker
 
 def waitForArduino(ser):
-    # wait until the Arduino sends 'Arduino Ready' - allows time for Arduino reset
-    # it also ensures that any bytes left over from a previous message are discarded
+
     #global startMarker, endMarker
     msg = ""
     while msg.find(startMarker) == -1 & msg.find(endMarker)==-1:
@@ -67,40 +66,46 @@ class PolControlImp(PolControl):
     Connection = False
     ControlPort = -1
     StatePort = -1
+    Simulation = False
 
     #COM Methods
     def FindSerialPorts(self):
         result = 0
         ActiveComPorts = list.comports()
-        myPorts = []
-        for i in range(len(ActiveComPorts)):
-            port = ActiveComPorts[i]
-            #print(port)
-            #time.sleep(2)
-            try:
-                arduino = s.Serial(port[0],57600,timeout=0.1)
-                boolVal = arduino.is_open
-                if boolVal==True:
-                    desc = port[1]
-                    if desc == 'Arduino Uno '+"("+port[0]+")":
-                        myPorts.append(str(port[0]))
-                arduino.close()
-            except Exception as e:
-                print(e)
+        if not self.Simulation:
+            myPorts = []
+            for i in range(len(ActiveComPorts)):
+                port = ActiveComPorts[i]
+                #print(port)
+                #time.sleep(2)
+                try:
+                    arduino = s.Serial(port[0],57600,timeout=0.1)
+                    boolVal = arduino.is_open
+                    if boolVal==True:
+                        desc = port[1]
+                        if desc == 'Arduino Uno '+"("+port[0]+")":
+                            myPorts.append(str(port[0]))
+                    arduino.close()
+                except Exception as e:
+                    print(e)
 
 
-        #Test COM Ports for being the State or Control Machines
-        for i in range(len(myPorts)):
-            ard1 = s.Serial(myPorts[i],57600,timeout=0.1)
-            str1 = waitForArduino(ard1)
-            if str1.find("R")!=-1 or str1.find("L")!=-1:
-                #print("Found State")
-                self.StatePort = int(myPorts[i][-1])
-            if str1.find("+")!=-1:
-                #print("Found Control")
-                self.ControlPort = int(myPorts[i][-1])
-            #str1 = ""
-            ard1.close()
+            #Test COM Ports for being the State or Control Machines
+            for i in range(len(myPorts)):
+                ard1 = s.Serial(myPorts[i],57600,timeout=0.1)
+                str1 = waitForArduino(ard1)
+                if str1.find("R")!=-1 or str1.find("L")!=-1:
+                    #print("Found State")
+                    self.StatePort = int(myPorts[i][-1])
+                if str1.find("+")!=-1:
+                    #print("Found Control")
+                    self.ControlPort = int(myPorts[i][-1])
+                #str1 = ""
+                ard1.close()
+        else:
+            myPorts = ["COM101","COM103"]
+            self.StatePort = int(myPorts[0][-3:])
+            self.ControlPort = int(myPorts[1][-3:])
         #print(self.StatePort)
         #print(self.ControlPort)
         #time.sleep(2)
