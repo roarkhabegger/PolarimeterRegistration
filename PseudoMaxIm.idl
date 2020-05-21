@@ -1,0 +1,23 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+uuid(41D03FB1-9920-422A-9474-E4363377DEBA),
+dual,
+oleautomation
+]
+interface IPseudoMaxIm : IDispatch{
+      HRESULT Expose([in] DOUBLE duration, [in] INT light , [in] INT filter , [out,retval] BOOLEAN *out);
+
+      [propget] HRESULT ReadyForDownload([out,retval] BOOLEAN *var);
+}
+
+[uuid(F21B0E11-CE18-4038-937C-DCC5C38101F9)]
+library PseudoMaxImTypeLib
+{
+  importlib("stdole2.tlb");
+  [uuid(54F96DF7-17C8-463E-97C9-BE1A4A536E70) ]
+  coclass PseudoMaxIm{
+      [default] interface IPseudoMaxIm;
+  };
+};
