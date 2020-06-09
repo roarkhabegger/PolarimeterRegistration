@@ -3,7 +3,7 @@ import comtypes.server.localserver
 import threading as th
 import subprocess as sp
 import serial as s
-from serial.tools import list_ports as list
+from serial.tools  import list_ports as ports
 #import serial.tools.list_ports.ListPortInfo as Info
 import time
 #import PolControlForm as form
@@ -71,12 +71,13 @@ class PolControlImp(PolControl):
     #COM Methods
     def FindSerialPorts(self):
         result = 0
-        ActiveComPorts = list.comports()
+        ActiveComPorts = ports.comports()
         if not self.Simulation:
             myPorts = []
+            print(len(ActiveComPorts))
             for i in range(len(ActiveComPorts)):
                 port = ActiveComPorts[i]
-                #print(port)
+                print(port)
                 #time.sleep(2)
                 try:
                     arduino = s.Serial(port[0],57600,timeout=0.1)
@@ -85,6 +86,8 @@ class PolControlImp(PolControl):
                         desc = port[1]
                         if desc == 'Arduino Uno '+"("+port[0]+")":
                             myPorts.append(str(port[0]))
+                        else:
+                            print(desc)
                     arduino.close()
                 except Exception as e:
                     print(e)
@@ -103,9 +106,9 @@ class PolControlImp(PolControl):
                 #str1 = ""
                 ard1.close()
         else:
-            myPorts = ["COM101","COM103"]
-            self.StatePort = int(myPorts[0][-3:])
-            self.ControlPort = int(myPorts[1][-3:])
+            myPorts = [101,103]
+            self.StatePort = myPorts[0]
+            self.ControlPort = myPorts[1]
         #print(self.StatePort)
         #print(self.ControlPort)
         #time.sleep(2)
@@ -118,30 +121,56 @@ class PolControlImp(PolControl):
         #cmdStr += position
         result = 0
         if self.TestConnect()==1:
-            try:
-                ardCont = s.Serial("COM"+str(self.ControlPort),57600)
-                sendToArduino(ardCont,b'V=1')
-                ardCont.close()
-                result=1
-            except Exception as e:
-                strOut = "Function SendCommand exited with the following error: \n"
-                strOut += str(e)
-                time.sleep(4)
+            if not self.Simulation:
+                try:
+                    ardCont = s.Serial("COM"+str(self.ControlPort),57600)
+                    sendToArduino(ardCont,b'V=1')
+                    ardCont.close()
+                    result=1
+                except Exception as e:
+                    strOut = "Function SendCommand exited with the following error: \n"
+                    strOut += str(e)
+                    time.sleep(4)
+            else:
+                try:
+                    ardCont = s.Serial("COM"+str(self.ControlPort),57600)
+                    inStr = motor + "=" + str(position)
+                    ardCont.write(inStr.encode('utf-8'))
+                    result = 1
+                    ardCont.close()
+                except Exception as e:
+                    strOut = "Function SendCommand exited with the following error: \n"
+                    strOut += str(e)
+                    print(strOut)
+                    time.sleep(4)
         return result
 
     def Home(self):
         cmdStr = b'H'
         result = 0
-        if self.TestConnect()==1:
+        if  not self.Simulation:
+            if self.TestConnect()==1:
+                try:
+                    ardCont = s.Serial("COM"+str(self.ControlPort),57600)
+                    sendToArduino(ardCont,cmdStr)
+                    print('Message Sent')
+                    ardCont.close()
+                    result=1
+                except Exception as e:
+                    strOut = "Function SendCommand exited with the following error: \n"
+                    strOut += str(e)
+        else:
             try:
                 ardCont = s.Serial("COM"+str(self.ControlPort),57600)
-                sendToArduino(ardCont,cmdStr)
-                print('Message Sent')
+                inStr = "H"
+                ardCont.write(inStr.encode('utf-8'))
+                result = 1
                 ardCont.close()
-                result=1
             except Exception as e:
                 strOut = "Function SendCommand exited with the following error: \n"
                 strOut += str(e)
+                print(strOut)
+                time.sleep(4)
         return result
 
     def TestConnect(self):
@@ -156,9 +185,9 @@ class PolControlImp(PolControl):
             result = 0
         else:
             try:
-                ard1 = s.Serial("COM"+str(self.StatePort),57600,timeout=0.1)
-                ard2 = s.Serial("COM"+str(self.ControlPort),57600,timeout=0.1)
-                if ard1.is_open & ard2.is_open:
+                ard1 = s.Serial("COM"+str(self.StatePort),57600)
+                ard2 = s.Serial("COM"+str(self.ControlPort),57600)
+                if ard1.is_open and ard2.is_open:
                     self.Connection=True
                     result = 1
                 ard1.close()
