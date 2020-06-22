@@ -20,6 +20,17 @@ def main():
         import win32com.client as com
     except Exception as e:
         instArr.append(pyStr+" -m pip install pywin32")
+        
+    
+    try:
+        import glob
+    except Exception as e:
+        instArr.append(pyStr+" -m pip install glob")
+    
+    try:
+        import astropy.io as fits
+    except Exception as e:
+        instArr.append(pyStr+" -m pip install astropy")
 
     print(instArr)
     if len(instArr)!=0:
