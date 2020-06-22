@@ -23,7 +23,7 @@ import glob
 import os
 
 def SaveFitsFiles(inputfolderpath,outputfilepath):
-    files = glob.glob(inputfolderpath+r"/*.fits")
+    files = glob.glob(inputfolderpath+r"*.fits")
     hdu1 = fits.open(files[0])
     fitsLst = [fits.PrimaryHDU(data = hdu1[0].data,header = hdu1[0].header)]
     if len(files)>1:
