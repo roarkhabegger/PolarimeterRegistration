@@ -18,6 +18,23 @@ GetModule("PseudoMaxIm.tlb")
 startMarker = '['
 endMarker = ']'
 
+from astropy.io import fits
+import glob
+import os
+
+def SaveFitsFiles(inputfolderpath,outputfilepath):
+    files = glob.glob(inputfolderpath+r"/*.fits")
+    hdu1 = fits.open(files[0])
+    fitsLst = [fits.PrimaryHDU(data = hdu1[0].data,header = hdu1[0].header)]
+    if len(files)>1:
+        for file in files[1:]:
+            hdul = fits.open(file)
+            hdu = fits.ImageHDU(data = hdul[0].data,header = hdul[0].header)
+            #print(tab)
+            fitsLst.append(hdu)
+
+    newFits = fits.HDUList(fitsLst)
+    newFits.writeto(outputfilepath)
 
 
 from comtypes.gen.PseudoMaxImTypeLib import PseudoMaxIm
@@ -50,7 +67,7 @@ class PseudoMaxImImp(PseudoMaxIm):
         pol_locations = [0,2]
 
         # Expose on every position and filter
-        for i in range(len(pol_filters):
+        for i in range(len(pol_filters)):
             pol_filter = pol_filters[i]
             self.pol_obj.SendCommand("L",pol_locations[i])
             for pol_position in pol_positions:
@@ -62,7 +79,7 @@ class PseudoMaxImImp(PseudoMaxIm):
                 self.maxIm_obj.saveImage('C:\\Users\\astro\\Desktop\\Work\\polarimeter\\9June2020\\Images\\image_{}_{}.fits'.format(pol_filter, pol_position))
 
         # Home the polarimeter after exposing
-        pol_obj.home()
+        self.pol_obj.home()
 
         return True
 
