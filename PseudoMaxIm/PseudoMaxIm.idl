@@ -7,9 +7,9 @@ dual,
 oleautomation
 ]
 interface IPseudoMaxIm : IDispatch{
-      HRESULT Expose([in] DOUBLE duration, [in] INT light , [in] INT filter , [out,retval] BOOLEAN *out);
+      HRESULT Expose([in] DOUBLE duration, [in] INT light , [in] INT filter , [out,retval] BYTE *out);
 
-      [propget] HRESULT ReadyForDownload([out,retval] BOOLEAN *var);
+      [propget] HRESULT ReadyForDownload([out,retval] BYTE *var);
 }
 
 [uuid(F21B0E11-CE18-4038-937C-DCC5C38101F9)]
