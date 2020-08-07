@@ -39,9 +39,9 @@ class PseudoMaxImImp(PseudoMaxIm):
     #COM Methods
     def Expose(self,duration, light, filter):
         # MaxIm Object
-        #maxIm_obj = com.Dispatch("MaxIm.CCDCamera")
-        #maxIm_obj.linkEnabled = True
-        #self.ReadyForDownload = False
+        maxIm_obj = com.Dispatch("MaxIm.CCDCamera")
+        maxIm_obj.linkEnabled = True
+        self.ReadyForDownload = False
 
         # Polarimeter obj
         pol_obj = com.Dispatch("PolControl")
@@ -67,28 +67,28 @@ class PseudoMaxImImp(PseudoMaxIm):
             for pol_position in pol_positions:
                 pol_obj.SendCommand(pol_filter, pol_position)
                 time.sleep(2) # add artificial delay
-                #maxIm_obj.Expose(duration, light, filter)
+                maxIm_obj.Expose(duration, light, filter)
                 #Fake exposure for no MaxIm:
                 #print("Exposing!")
                 #time.sleep(duration)
                 #print("Done Exposing")
-                #while maxIm_obj.ImageReady == False:
-                #    time.sleep(1)
-                #    print('waiting for exposure to be ready..')
-                #maxIm_obj.saveImage('C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images\\image_{}_{}.fits'.format(pol_filter, pol_position))
+                while maxIm_obj.ImageReady == False:
+                    time.sleep(1)
+                    print('waiting for exposure to be ready..')
+                maxIm_obj.saveImage('C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images\\image_{}_{}.fits'.format(pol_filter, pol_position))
 
         # Home the polarimeter after exposing
         pol_obj.home()
 
         # Create a FITS cube and delete original images
-        #input = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images'
-        #output = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\cubeImages'
+        input = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images'
+        output = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\cubeImages'
 
-        #try:
-        #    FitsCreationModified.SaveFitsFiles(input, output)
-        #    FitsCreationModified.DeleteFitsFiles(input)
-        #xcept IOError:
-        #    print("Missing files..")
+        try:
+            FitsCreationModified.SaveFitsFiles(input, output)
+            FitsCreationModified.DeleteFitsFiles(input)
+        except IOError:
+            print("Missing files..")
         self.ReadyForDownload = True
         return True
 
