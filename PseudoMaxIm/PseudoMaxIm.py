@@ -44,51 +44,59 @@ class PseudoMaxImImp(PseudoMaxIm):
         self.ReadyForDownload = False
 
         # Polarimeter obj
-        pol_obj = com.Dispatch("PolControl")
-        pol_obj.Simulation = True
-        pol_obj.FindSerialPorts()
+        if filter<=0:
+            pol_obj = com.Dispatch("PolControl")
+            pol_obj.Simulation = True
+            pol_obj.FindSerialPorts()
 
-        pol_positions = [0, 1, 2, 3]
-        pol_filters = ["V", "I"]
-        pol_locations = [0,2]
-        pol_outsLA = ["100","001"]
-        # Expose on every position and filter
-        for i in range(len(pol_filters)):
-            pol_filter = pol_filters[i]
-            pol_obj.SendCommand("L", pol_locations[i])
-            #Actually wait for polarimeter to move (put time delay in Sim)
-            isReady = False
-            while not isReady:
-                state = pol_obj.ReadState()
-                #print(state)
-                if state[2:5] == pol_outsLA[i]:
-                    isReady = True
+            pol_positions = [0, 1, 2, 3]
+            pol_filters = ["V", "I"]
+            pol_locations = [0,2]
+            pol_outsLA = ["100","001"]
+            # Expose on every position and filter
+            for i in range(len(pol_filters)):
+                pol_filter = pol_filters[i]
+                pol_obj.SendCommand("L", pol_locations[i])
+                #Actually wait for polarimeter to move (put time delay in Sim)
+                isReady = False
+                while not isReady:
+                    state = pol_obj.ReadState()
+                    #print(state)
+                    if state[2:5] == pol_outsLA[i]:
+                        isReady = True
 
-            for pol_position in pol_positions:
-                pol_obj.SendCommand(pol_filter, pol_position)
-                time.sleep(2) # add artificial delay
-                maxIm_obj.Expose(duration, light, filter)
-                #Fake exposure for no MaxIm:
-                #print("Exposing!")
-                #time.sleep(duration)
-                #print("Done Exposing")
-                while maxIm_obj.ImageReady == False:
-                    time.sleep(1)
-                    print('waiting for exposure to be ready..')
-                maxIm_obj.saveImage('C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images\\image_{}_{}.fits'.format(pol_filter, pol_position))
+                for pol_position in pol_positions:
+                    pol_obj.SendCommand(pol_filter, pol_position)
+                    time.sleep(2) # add artificial delay
+                    maxIm_obj.Expose(duration, light, filter)
+                    #Fake exposure for no MaxIm:
+                    #print("Exposing!")
+                    #time.sleep(duration)
+                    #print("Done Exposing")
+                    while maxIm_obj.ImageReady == False:
+                        time.sleep(1)
+                        print('waiting for exposure to be ready..')
+                    maxIm_obj.saveImage('C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images\\image_{}_{}.fits'.format(pol_filter, pol_position))
 
-        # Home the polarimeter after exposing
-        pol_obj.home()
+            # Home the polarimeter after exposing
+            pol_obj.home()
 
-        # Create a FITS cube and delete original images
-        input = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images'
-        output = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\cubeImages'
+            # Create a FITS cube and delete original images
+            input = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\images'
+            output = 'C:\\Users\\astro\\Desktop\\Work\\polarimeter\\22June2020\\cubeImages'
 
-        try:
-            FitsCreationModified.SaveFitsFiles(input, output)
-            FitsCreationModified.DeleteFitsFiles(input)
-        except IOError:
-            print("Missing files..")
+            try:
+                FitsCreationModified.SaveFitsFiles(input, output)
+                FitsCreationModified.DeleteFitsFiles(input)
+            except IOError:
+                print("Missing files..")
+
+        else:
+            maxIm_obj.Expose(duration,light,filter)
+            while maxIm_obj.ImageReady == False:
+                time.sleep(1)
+                print('waiting for exposure to be ready..')
+
         self.ReadyForDownload = True
         return True
 
